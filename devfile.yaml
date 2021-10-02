@@ -18,3 +18,7 @@ components:
     type: chePlugin
   - id: crysislinux/openjscad/latest
     type: chePlugin
+  - id: redhat/vscode-yaml/latest
+    type: chePlugin
+  - reference: 'https://mtsmfm.github.io/che-plugin-registry/main/v3/plugins/crysislinux/openjscad/latest'
+    type: chePlugin
