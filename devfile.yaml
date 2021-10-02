@@ -1,6 +1,6 @@
 apiVersion: 1.0.0
 metadata:
-  generatedName: things-
+  generateName: things-
 projects:
   - name: things
     source:
