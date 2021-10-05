@@ -140,25 +140,6 @@ const makeDiodeSlots = () => {
       size: [diode_dia, diode_dia, base.z],
       center: [-(base.x / 2 - diode_dia / 2), pin2.y, 0],
     }),
-    // Bottom front horizontal diode wire line
-    cuboidElliptic({
-      startSize: [base.x, diode_dia * 1.2],
-      endSize: [base.x, diode_dia * 0.8],
-      height: diode_dia * 2.2,
-      center: [0, -grid * 4, (base.z - diode_dia * 2.2) / 2],
-    }),
-    // Bottom side diode wire line
-    cuboid({
-      size: [diode_dia, diode_dia, base.z],
-      center: [-(base.x - diode_dia) / 2, -grid * 4, 0],
-    }),
-    // Bottom back horizontal diode wire line
-    cuboidElliptic({
-      height: diode.z * 0.8,
-      startSize: [grid * 2.5, diode_dia * 1.5],
-      endSize: [grid * 2.5, diode_dia * 0.5],
-      center: [-base.x / 2.5, -grid * 4, -(base.z - diode.z * 0.8) / 2],
-    }),
     // Diode body
     rotate(
       [0, 0, degToRad(-6)],
@@ -188,11 +169,60 @@ const makeDiodeSlots = () => {
   );
 };
 
+const makeQiHole = () => {
+  return union(
+    cylinder({
+      radius: pin_dia / 2,
+      height: base.z,
+      center: [-4, -grid * 4.1, 0],
+    }),
+    cylinder({
+      radius: pin_dia / 2,
+      height: base.z,
+      center: [pin1.x - 1.2, pin1.y + 2.5, 0],
+    })
+  );
+};
+
+const makeQiSocket = () => {
+  const bottomLeft = subtract(
+    cylinder({
+      radius: pin_dia / 2 + 0.6,
+      height: 5,
+      center: [-4, -grid * 4.1, base.z / 2 + 5 / 2],
+    }),
+    cylinder({
+      radius: pin_dia / 2,
+      height: 5,
+      center: [-4, -grid * 4.1, base.z / 2 + 5 / 2],
+    })
+  );
+
+  const topRight = subtract(
+    cylinder({
+      radius: pin_dia / 2 + 0.6,
+      height: 5,
+      center: [pin1.x - 1.2, pin1.y + 2.5, base.z / 2 + 5 / 2],
+    }),
+    cylinder({
+      radius: pin_dia / 2,
+      height: 5,
+      center: [pin1.x - 1.2, pin1.y + 2.5, base.z / 2 + 5 / 2],
+    })
+  );
+
+  return union(bottomLeft, topRight);
+};
+
 export const main = () => {
-  return subtract(
-    makeBody(),
-    makeWireSlots(),
-    makeDiodeSlots(),
-    pcbMountPegs()
+  return union(
+    subtract(
+      makeBody(),
+      makeWireSlots(),
+      makeDiodeSlots(),
+      pcbMountPegs(),
+      makeQiHole()
+    ),
+    makeQiSocket()
   );
 };
