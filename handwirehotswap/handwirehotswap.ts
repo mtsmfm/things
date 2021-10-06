@@ -9,7 +9,7 @@ type Vec2 = [number, number];
 type Vec3 = [number, number, number];
 
 const { cuboid, cylinder, cylinderElliptic } = primitives;
-const { rotate } = transforms;
+const { rotate, translate } = transforms;
 const { subtract, union } = booleans;
 const { degToRad } = utils;
 
@@ -19,7 +19,7 @@ const pin_dia = 1.5;
 const pin1 = { x: 3 * grid, y: 2 * grid };
 const pin2 = { x: -2 * grid, y: 4 * grid };
 
-const stem = 4.0;
+const stem = 4.2;
 
 const diode = { x: 1.75, y: 3.4, z: 1.75 };
 const diode_dia = 0.56;
@@ -41,7 +41,7 @@ const makeBody = () => {
     }),
     cylinderElliptic({
       height: thickness,
-      startRadius: [(pin_dia / 2) * 1.3, (pin_dia / 2) * 1.3],
+      startRadius: [pin_dia / 2, pin_dia / 2],
       endRadius: [pin_dia / 2, pin_dia / 2],
       center: [pin1.x, pin1.y, 0],
     }),
@@ -114,10 +114,6 @@ const pcbMountPegs = () => {
 const makeDiodeSlots = () => {
   return union(
     // Top vertical diode wire line
-    // cuboid({
-    //   size: [diode_dia, base.y / 2 - pin2.y, base.z],
-    //   center: [pin2.x, pin2.y + (base.y / 2 - pin2.y) / 2, 0],
-    // }),
     cuboidElliptic({
       height: base.z,
       startSize: [diode_dia * 1.3, base.y / 2 - pin2.y],
@@ -140,25 +136,6 @@ const makeDiodeSlots = () => {
       size: [diode_dia, diode_dia, base.z],
       center: [-(base.x / 2 - diode_dia / 2), pin2.y, 0],
     }),
-    // Bottom front horizontal diode wire line
-    cuboidElliptic({
-      startSize: [base.x, diode_dia * 1.2],
-      endSize: [base.x, diode_dia * 0.8],
-      height: diode_dia * 2.2,
-      center: [0, -grid * 4, (base.z - diode_dia * 2.2) / 2],
-    }),
-    // Bottom side diode wire line
-    cuboid({
-      size: [diode_dia, diode_dia, base.z],
-      center: [-(base.x - diode_dia) / 2, -grid * 4, 0],
-    }),
-    // Bottom back horizontal diode wire line
-    cuboidElliptic({
-      height: diode.z * 0.8,
-      startSize: [grid * 2.5, diode_dia * 1.5],
-      endSize: [grid * 2.5, diode_dia * 0.5],
-      center: [-base.x / 2.5, -grid * 4, -(base.z - diode.z * 0.8) / 2],
-    }),
     // Diode body
     rotate(
       [0, 0, degToRad(-6)],
@@ -179,20 +156,47 @@ const makeDiodeSlots = () => {
     rotate(
       [0, 0, degToRad(-10)],
       cuboidElliptic({
-        height: diode.z * 0.8,
+        height: diode.z,
         startSize: [diode_dia * 1.5, grid * 5.5],
         endSize: [diode_dia * 0.8, grid * 5.5],
-        center: [-3.4, 1, -(base.z - diode.z * 0.8) / 2],
+        center: [-3.4, 1, -(base.z - diode.z) / 2],
       })
     )
   );
 };
 
+const makeQiHole = () => {
+  const hole = cylinderElliptic({
+    startRadius: [pin_dia / 2, (pin_dia / 2) * 1.2],
+    endRadius: [(pin_dia / 2) * 1.2, (pin_dia / 2) * 1.5],
+    height: base.z + 5,
+  });
+
+  return union(
+    translate([-4, -grid * 4.1, 5 / 2], hole),
+    translate([pin1.x - 1.2, pin1.y + 2.5, 5 / 2], hole)
+  );
+};
+
+const makeQiSocket = () => {
+  const socket = cylinder({
+    radius: pin_dia / 2 + 0.7,
+    height: 5,
+  });
+
+  return union(
+    translate([-4, -grid * 4.1, base.z / 2 + 5 / 2], socket),
+    translate([pin1.x - 1.2, pin1.y + 2.5, base.z / 2 + 5 / 2], socket)
+  );
+};
+
 export const main = () => {
-  return subtract(
-    makeBody(),
-    makeWireSlots(),
-    makeDiodeSlots(),
-    pcbMountPegs()
+  return union(
+    subtract(
+      union(makeBody(), makeQiSocket()),
+      makeDiodeSlots(),
+      pcbMountPegs(),
+      makeQiHole()
+    )
   );
 };
