@@ -80,14 +80,14 @@ const makeEdge = ({ size, edgeSize }: { size: Vec3; edgeSize: number }) => {
 const shaftHole = union(
   cuboidElliptic({
     center: [0, 0, 0],
-    startSize: [1.2, 4.2],
+    startSize: [1.3, 4.3],
     endSize: [1.2, 4.1],
     height: shaftHeight,
   }),
   makeEdge({ size: [1.2, 4.1, shaftHeight], edgeSize: 0.15 }),
   cuboidElliptic({
     center: [0, 0, 0],
-    startSize: [4.2, 1.4],
+    startSize: [4.3, 1.4],
     endSize: [4.1, 1.4],
     height: shaftHeight,
   }),
