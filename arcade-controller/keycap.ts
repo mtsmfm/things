@@ -78,23 +78,25 @@ const makeEdge = ({ size, edgeSize }: { size: Vec3; edgeSize: number }) => {
 };
 
 const shaftHole = union(
-  cuboidElliptic({
-    center: [0, 0, 0],
-    startSize: [1.3, 4.3],
-    endSize: [1.2, 4.1],
-    height: shaftHeight,
-  }),
-  makeEdge({ size: [1.2, 4.1, shaftHeight], edgeSize: 0.15 }),
-  cuboidElliptic({
-    center: [0, 0, 0],
-    startSize: [4.3, 1.4],
-    endSize: [4.1, 1.4],
-    height: shaftHeight,
-  }),
-  rotate(
-    [0, 0, degToRad(90)],
-    makeEdge({ size: [1.4, 4.1, shaftHeight], edgeSize: 0.15 })
-  )
+  cuboid({ size: [1.35, 4.3, shaftHeight] }),
+  cuboid({ size: [4.3, 1.4, shaftHeight] })
+  // cuboidElliptic({
+  //   center: [0, 0, 0],
+  //   startSize: [1.3, 4.3],
+  //   endSize: [1.2, 4.1],
+  //   height: shaftHeight,
+  // }),
+  // makeEdge({ size: [1.2, 4.1, shaftHeight], edgeSize: 0.2 }),
+  // cuboidElliptic({
+  //   center: [0, 0, 0],
+  //   startSize: [4.3, 1.4],
+  //   endSize: [4.1, 1.4],
+  //   height: shaftHeight,
+  // }),
+  // rotate(
+  //   [0, 0, degToRad(90)],
+  //   makeEdge({ size: [1.4, 4.1, shaftHeight], edgeSize: 0.2 })
+  // )
 );
 
 export const main = () => {
