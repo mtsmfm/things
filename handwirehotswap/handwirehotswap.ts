@@ -122,7 +122,7 @@ const makeDiodeSlots = () => {
     }),
     // Top back horizontal diode wire line
     cuboidElliptic({
-      height: diode_dia,
+      height: diode_dia * 2,
       startSize: [base.x / 2 + pin2.x, diode_dia * 1.3],
       endSize: [base.x / 2 + pin2.x, diode_dia],
       center: [
@@ -167,8 +167,8 @@ const makeDiodeSlots = () => {
 
 const makeQiHole = () => {
   const hole = cylinderElliptic({
-    startRadius: [pin_dia / 2, (pin_dia / 2) * 1.2],
-    endRadius: [(pin_dia / 2) * 1.2, (pin_dia / 2) * 1.5],
+    startRadius: [pin_dia / 2, (pin_dia / 2) * 1.1],
+    endRadius: [(pin_dia / 2) * 1, (pin_dia / 2) * 1.3],
     height: base.z + 5,
   });
 
@@ -180,7 +180,7 @@ const makeQiHole = () => {
 
 const makeQiSocket = () => {
   const socket = cylinder({
-    radius: pin_dia / 2 + 0.7,
+    radius: pin_dia / 2 + 0.8,
     height: 5,
   });
 
