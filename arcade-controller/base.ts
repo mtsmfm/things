@@ -24,7 +24,7 @@ const keySwitchHole = union(
   cuboid({ size: [5, 1.5, 2.5], center: [0, -7, -(4 - 2.5) / 2] })
 );
 
-const buttonHole = cylinder({ height: 4, radius: 12 });
+const buttonHole = cylinder({ height: 4, radius: 13 });
 
 const buttonPositions = [
   [80, -20],
