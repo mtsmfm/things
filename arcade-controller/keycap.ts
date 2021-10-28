@@ -13,6 +13,7 @@ const {
   roundedCuboid,
   roundedCylinder,
   polygon,
+  torus,
 } = primitives;
 const { rotate, translate } = transforms;
 const { subtract, union } = booleans;
@@ -22,86 +23,97 @@ const { extrudeLinear } = extrusions;
 type Vec2 = [number, number];
 type Vec3 = [number, number, number];
 
-const cuboidElliptic = ({
-  center,
-  startSize,
-  endSize,
-  height,
-}: {
-  startSize: Vec2;
-  endSize: Vec2;
-  height: number;
-  center: Vec3;
-}) => {
-  return cylinderElliptic({
-    height,
-    startRadius: startSize.map((n) => n / Math.sqrt(2)) as Vec2,
-    endRadius: endSize.map((n) => n / Math.sqrt(2)) as Vec2,
-    segments: 4,
-    startAngle: Math.PI / 4,
-    endAngle: Math.PI / 4,
-    center: center,
-  });
-};
-
 const capHeight = 3;
 const shaftHeight = 4;
+const segments = 32 * 4;
+const capRadius = 23 / 2;
 
-const cap = cylinderElliptic({
-  startRadius: [(24 / 2) * 0.9, (24 / 2) * 0.9],
-  height: capHeight,
-  endRadius: [24 / 2, 24 / 2],
-});
-
-const shaft = subtract(cylinder({ radius: 5.5 / 2, height: shaftHeight }));
-
-const makeEdge = ({ size, edgeSize }: { size: Vec3; edgeSize: number }) => {
-  const edge = extrudeLinear(
-    { height: size[2] },
-    polygon({
-      points: [
-        [-edgeSize, -edgeSize],
-        [size[0] + edgeSize, -edgeSize],
-        [size[0], edgeSize],
-        [0, edgeSize],
-      ],
-    })
-  );
+const flatBaseRoundedCylinder = ({
+  height,
+  radius,
+  roundRadius,
+  segments,
+}: {
+  radius: number;
+  roundRadius: number;
+  height: number;
+  segments: number;
+}) => {
+  const innerRadius = roundRadius;
+  const outerRadius = radius - innerRadius;
 
   return union(
-    translate([-size[0] / 2, -size[1] / 2 + edgeSize, -size[2] / 2], edge),
     translate(
-      [size[0] / 2, size[1] / 2 - edgeSize, -size[2] / 2],
-      rotate([0, 0, degToRad(180)], edge)
-    )
+      [0, 0, -height / 2 + innerRadius],
+      union(
+        torus({
+          innerRadius,
+          innerSegments: segments,
+          outerRadius,
+          outerSegments: segments,
+        }),
+        cylinder({ radius: outerRadius, height: innerRadius * 2, segments })
+      )
+    ),
+    translate(
+      [0, 0, height / 2 - innerRadius],
+      union(cylinder({ radius: radius, height: innerRadius * 2, segments }))
+    ),
+    cylinder({ radius, height: height - innerRadius * 2, segments })
   );
 };
+
+const cap = subtract(
+  flatBaseRoundedCylinder({
+    roundRadius: 2,
+    radius: capRadius,
+    height: capHeight + shaftHeight,
+    segments,
+  }),
+  translate(
+    [0, 0, capHeight / 2],
+    union(
+      cuboid({
+        size: [15.5, 15.5, shaftHeight],
+      }),
+      cuboid({
+        size: [2, 17, shaftHeight],
+      })
+    )
+  )
+);
+
+const shaft = subtract(
+  cylinder({ radius: 5.5 / 2, height: shaftHeight, segments })
+);
+
+const chamferSize = 0.7;
+const chamfer = rotate(
+  [0, degToRad(45), 0],
+  cuboid({ size: [chamferSize, 4.3, chamferSize] })
+);
 
 const shaftHole = union(
   cuboid({ size: [1.35, 4.3, shaftHeight] }),
-  cuboid({ size: [4.3, 1.4, shaftHeight] })
-  // cuboidElliptic({
-  //   center: [0, 0, 0],
-  //   startSize: [1.3, 4.3],
-  //   endSize: [1.2, 4.1],
-  //   height: shaftHeight,
-  // }),
-  // makeEdge({ size: [1.2, 4.1, shaftHeight], edgeSize: 0.2 }),
-  // cuboidElliptic({
-  //   center: [0, 0, 0],
-  //   startSize: [4.3, 1.4],
-  //   endSize: [4.1, 1.4],
-  //   height: shaftHeight,
-  // }),
-  // rotate(
-  //   [0, 0, degToRad(90)],
-  //   makeEdge({ size: [1.4, 4.1, shaftHeight], edgeSize: 0.2 })
-  // )
+  cuboid({ size: [4.3, 1.4, shaftHeight] }),
+  translate([chamferSize, 0, shaftHeight / 2], chamfer),
+  translate([-chamferSize, 0, shaftHeight / 2], chamfer),
+  translate(
+    [0, chamferSize, shaftHeight / 2],
+    rotate([0, 0, degToRad(90)], chamfer)
+  ),
+  translate(
+    [0, -chamferSize, shaftHeight / 2],
+    rotate([0, 0, degToRad(90)], chamfer)
+  )
 );
 
 export const main = () => {
-  return subtract(
-    union(cap, translate([0, 0, (capHeight + shaftHeight) / 2], shaft)),
-    translate([0, 0, (capHeight + shaftHeight) / 2], shaftHole)
+  return rotate(
+    [0, degToRad(180), 0],
+    subtract(
+      union(cap, translate([0, 0, capHeight / 2], shaft)),
+      translate([0, 0, capHeight / 2], shaftHole)
+    )
   );
 };
