@@ -97,3 +97,70 @@ export const flatBaseRoundedCylinder = ({
     cylinder({ radius, height: height - innerRadius * 2, segments })
   );
 };
+
+export const flatBaseRoundedCuboid = ({
+  size,
+  roundRadius,
+  segments,
+}: {
+  roundRadius: number;
+  size: Vec3;
+  segments: number;
+}) => {
+  const height = size[2];
+  const radius = size[0] / Math.sqrt(2);
+  const innerRadius = roundRadius;
+  const outerRadius = radius - innerRadius;
+
+  return rotate(
+    [0, 0, degToRad(45)],
+    union(
+      translate(
+        [0, 0, -height / 2 + innerRadius],
+        union(
+          torus({
+            innerRadius,
+            innerSegments: segments,
+            outerRadius,
+            outerSegments: 4,
+          }),
+          cylinder({
+            radius: outerRadius,
+            height: innerRadius * 2,
+            segments: 4,
+          })
+        )
+      ),
+      translate(
+        [0, 0, height / 2 - innerRadius],
+        union(
+          cylinder({ radius: radius, height: innerRadius * 2, segments: 4 })
+        )
+      ),
+      cylinder({ radius, height: height - innerRadius * 2, segments: 4 })
+    )
+  );
+};
+
+export const main = () => {
+  return union(
+    cuboid({ size: [10, 10, 7] }),
+    translate(
+      [0, 15, 0],
+      flatBaseRoundedCylinder({
+        radius: 10 / 2,
+        segments: 32,
+        roundRadius: 1.5,
+        height: 7,
+      })
+    ),
+    translate(
+      [0, -15, 0],
+      flatBaseRoundedCuboid({
+        roundRadius: 2,
+        size: [10, 10, 7],
+        segments: 32,
+      })
+    )
+  );
+};
