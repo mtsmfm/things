@@ -20,24 +20,18 @@ const { subtract, union } = booleans;
 const { degToRad } = utils;
 const { extrudeLinear } = extrusions;
 
-const height = 6;
+const height = 4;
 const pillar = cylinder({ height, radius: 14 / 2 });
 const hole = cylinder({
-  height: 3 * 1.5,
-  radius: 4.5 / 2,
+  height,
+  radius: (3 + 0.3) / 2,
 });
 const chamfer = cylinderElliptic({
-  height: 0.7,
-  startRadius: [4.5 / 2, 4.5 / 2],
-  endRadius: [5.5 / 2, 5.5 / 2],
+  height: 2,
+  startRadius: [(3 + 0.3) / 2, (3 + 0.3) / 2],
+  endRadius: [(6 + 0.3) / 2, (6 + 0.3) / 2],
 });
 
 export const main = () => {
-  return subtract(
-    pillar,
-    translate(
-      [0, 0, height / 2 - (3 * 1.5) / 2],
-      union(hole, translate([0, 0, (3 * 1.5 - 0.5) / 2], chamfer))
-    )
-  );
+  return subtract(pillar, hole, translate([0, 0, (height - 2) / 2], chamfer));
 };

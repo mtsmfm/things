@@ -5,7 +5,7 @@ import {
   utils,
   extrusions,
 } from "@jscad/modeling";
-import { flatBaseRoundedCuboid, flatBaseRoundedCylinder } from "./utils";
+import { flatBaseRoundedCuboid, flatBaseRoundedCylinder } from "./utils/utils";
 
 const {
   cuboid,
@@ -27,11 +27,14 @@ const segments = 32;
 const capRadius = 23 / 2;
 
 const cap = subtract(
-  flatBaseRoundedCuboid({
-    roundRadius: 2,
-    size: [17.5, 17.5, capHeight + shaftHeight],
-    segments,
-  }),
+  translate(
+    [0, 0, -0.5],
+    flatBaseRoundedCuboid({
+      roundRadius: 2,
+      size: [17.5, 17.5, capHeight + shaftHeight - 1],
+      segments,
+    })
+  ),
   translate(
     [0, 0, capHeight / 2],
     union(
