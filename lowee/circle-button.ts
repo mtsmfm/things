@@ -23,7 +23,7 @@ const { extrudeLinear } = extrusions;
 
 const capHeight = 3;
 const shaftHeight = 4;
-const segments = 32 * 4;
+const segments = 32 * 2;
 const capRadius = 23 / 2;
 
 const cap = subtract(
@@ -61,7 +61,7 @@ const chamfer = rotate(
 
 const shaftHole = union(
   cuboid({ size: [1.35, 4.3, shaftHeight] }),
-  cuboid({ size: [4.3, 1.4, shaftHeight] }),
+  cuboid({ size: [10, 1.4, shaftHeight] }),
   translate([chamferSize, 0, shaftHeight / 2], chamfer),
   translate([-chamferSize, 0, shaftHeight / 2], chamfer),
   translate(
