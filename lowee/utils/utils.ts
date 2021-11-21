@@ -38,7 +38,7 @@ export const circleButtonPositions = [
   // [110, 35],
 ];
 
-export const basePlateSize: Vec3 = [220, 140, 4];
+export const basePlateSize: Vec3 = [220, 140, 3];
 
 export const squareButtonHoleSize = 19;
 const squareButtonKeyPitch = squareButtonHoleSize + 2;
