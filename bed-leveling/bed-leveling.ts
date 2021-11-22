@@ -9,8 +9,8 @@ const maxSize: Vec3 = [260, 200, 200];
 const height = 0.2;
 const width = 0.8;
 
-const baseX = (maxSize[0] - 10) / 20;
-const baseY = (maxSize[1] - 10) / 20;
+const baseX = (maxSize[0] - 15) / 20;
+const baseY = (maxSize[1] - 15) / 20;
 
 const draw = (points: [Vec2, Vec2]) => {
   return extrudeRectangular({ height, size: width / 2 }, line(points));
@@ -51,6 +51,6 @@ export const main = () => {
         })
       )
     ),
-    primitives.cuboid({ size: maxSize })
+    primitives.cuboid({ size: maxSize.map((x) => x - 10) as Vec3 })
   );
 };
