@@ -4,6 +4,9 @@ import {
   booleans,
   utils,
   extrusions,
+  expansions,
+  geometries,
+  maths,
 } from "@jscad/modeling";
 
 const {
@@ -14,11 +17,18 @@ const {
   roundedCylinder,
   polygon,
   torus,
+  arc,
+  roundedRectangle,
+  circle,
 } = primitives;
 const { rotate, translate } = transforms;
-const { subtract, union } = booleans;
+const { subtract, union, intersect } = booleans;
 const { degToRad } = utils;
-const { extrudeLinear } = extrusions;
+const { extrudeLinear, extrudeRectangular, extrudeFromSlices, slice } =
+  extrusions;
+const { expand } = expansions;
+const { geom2 } = geometries;
+const { mat4 } = maths;
 
 export type Vec2 = [number, number];
 export type Vec3 = [number, number, number];
@@ -142,6 +152,46 @@ export const flatBaseRoundedCuboid = ({
   );
 };
 
+export const roundCornerCuboidWithChamfer = ({
+  size,
+  roundRadius,
+  chamferSize,
+}: {
+  size: Vec3;
+  roundRadius: number;
+  chamferSize: number;
+}) => {
+  const maxIndex = 2;
+
+  return extrudeFromSlices(
+    {
+      numberOfSlices: maxIndex + 1,
+      callback: (_progress, index, base) => {
+        let newslice = slice.fromSides(geom2.toSides(base));
+        newslice = slice.transform(
+          mat4.fromScaling(mat4.create(), [
+            index === maxIndex ? (size[0] - chamferSize) / size[0] : 1,
+            index === maxIndex ? (size[1] - chamferSize) / size[1] : 1,
+            1,
+          ]),
+          newslice
+        );
+        newslice = slice.transform(
+          mat4.fromTranslation(mat4.create(), [
+            0,
+            0,
+            index === 0 ? 0 : index === 1 ? size[2] - chamferSize : size[2],
+          ]),
+          newslice
+        );
+
+        return newslice;
+      },
+    },
+    roundedRectangle({ size: [size[0], size[1]], roundRadius })
+  );
+};
+
 export const main = () => {
   return union(
     cuboid({ size: [10, 10, 7] }),
@@ -160,6 +210,14 @@ export const main = () => {
         roundRadius: 2,
         size: [10, 10, 7],
         segments: 32,
+      })
+    ),
+    translate(
+      [0, 30, 0],
+      roundCornerCuboidWithChamfer({
+        size: [20, 10, 3],
+        roundRadius: 2,
+        chamferSize: 1.5,
       })
     )
   );
