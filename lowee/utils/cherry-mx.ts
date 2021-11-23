@@ -19,7 +19,7 @@ export const keySwitchHole = union(
 );
 
 const pcbClick = translate(
-  [-3, (18 + 2) / 2, 0],
+  [-5, (18 + 2) / 2, 0],
   translate(
     [0, 0, -(9 - height) / 2],
     subtract(
