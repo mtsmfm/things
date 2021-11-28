@@ -11,6 +11,7 @@ import {
   basePlateSize,
   squareButtonPositions,
   screwHolePositions,
+  roundCornerCuboidWithChamfer,
 } from "./utils/utils";
 import { keySwitchHole, pcbClicks } from "./utils/cherry-mx";
 
@@ -21,21 +22,34 @@ const { subtract, union } = booleans;
 const { degToRad } = utils;
 const { extrudeLinear } = extrusions;
 
-const basePlate = cuboid({
-  size: basePlateSize,
-});
+const basePlate = translate(
+  [0, 0, -basePlateSize[2] / 2],
+  roundCornerCuboidWithChamfer({
+    size: basePlateSize,
+    roundRadius: 3,
+    chamferSize: 0,
+  })
+);
 
 const ufbShaft = subtract(
   cuboid({ size: [8, 8, 4] }),
   cylinder({
-    radius: 3.3 / 2,
+    radius: 3.4 / 2,
     height: 4,
   })
 );
 
 const ufbHole = union(
   subtract(
-    cuboid({ size: [96, 45, 4] }),
+    union(
+      cuboid({ size: [96, 45, 4] }),
+      cuboid({
+        size: [4, 45 - 8 * 2, 3],
+        center: [(96 + 4) / 2, 0, -(4 - 3) / 2],
+      }),
+      cuboid({ size: [80, 6, 4], center: [0, (45 + 6) / 2, 0] }),
+      cuboid({ size: [80, 4, 4], center: [0, -(45 + 4) / 2, 0] })
+    ),
     translate([(96 - 8) / 2, (45 - 8) / 2, 0], ufbShaft),
     translate([-(96 - 8) / 2, (45 - 8) / 2, 0], ufbShaft),
     translate([(96 - 8) / 2, -(45 - 8) / 2, 0], ufbShaft),
@@ -69,17 +83,7 @@ export const main = () => {
         [x, y, 0],
         cylinder({
           height: basePlateSize[2],
-          radius: (4.5 / 2 / Math.sqrt(3)) * 2,
-          segments: 6,
-        })
-      )
-    ),
-    ...screwHolePositions.map(([x, y]) =>
-      translate(
-        [x == 0 ? x : x > 0 ? x - 10 : x + 10, x == 0 ? y - 30 : y],
-        cylinder({
-          height: basePlateSize[2],
-          radius: 3.3 / 2,
+          radius: 3.4 / 2,
         })
       )
     )

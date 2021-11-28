@@ -20,13 +20,15 @@ const { subtract, union } = booleans;
 const { degToRad } = utils;
 const { extrudeLinear } = extrusions;
 
-const height = 13;
+const height = 7.2;
 const pillar = cylinder({ height, radius: 14 / 2, segments: 6 });
 const suctionHole = cylinder({
   height,
   radius: (6 / 2 / Math.sqrt(3)) * 2,
   segments: 6,
 });
+const chamferHeight = 2.2;
+const shaftHeight = 4 - chamferHeight;
 
 export const main = () => {
   return subtract(
@@ -44,16 +46,16 @@ export const main = () => {
           radius: (3 + 0.3) / 2,
         }),
         translate(
-          [0, 0, (height - (height - (2.2 + 2))) / 2],
+          [0, 0, (height - (height - (shaftHeight + chamferHeight))) / 2],
           cylinder({
-            height: height - (2.2 + 2),
+            height: height - (shaftHeight + chamferHeight),
             radius: (6 + 0.3) / 2,
           })
         ),
         translate(
-          [0, 0, -(height - 2.2) / 2 + 2],
+          [0, 0, -(height - chamferHeight) / 2 + shaftHeight],
           cylinderElliptic({
-            height: 2.2,
+            height: chamferHeight,
             startRadius: [(3 + 0.3) / 2, (3 + 0.3) / 2],
             endRadius: [(6 + 0.3) / 2, (6 + 0.3) / 2],
           })
