@@ -21,35 +21,24 @@ const { subtract, union } = booleans;
 const { degToRad } = utils;
 const { extrudeLinear } = extrusions;
 
-const thickness = 3;
+const thickness = 5;
 const bowlSize = 100;
+const height = 50;
 
 export const main = () => {
   return union(
     subtract(
       translate(
-        [0, 0, -thickness / 2],
+        [0, 0, -height / 2],
         roundCornerCuboidWithChamfer({
           chamferSize: 1,
           roundRadius: 1,
-          size: [bowlSize + thickness, bowlSize + thickness, thickness],
+          size: [bowlSize + thickness, bowlSize + thickness, height],
         })
       ),
-      cuboid({ size: [bowlSize, bowlSize, thickness] })
-    ),
-    subtract(
-      union(
-        translate(
-          [(bowlSize + thickness) / 2, 0, -(50 + thickness) / 2],
-          cuboid({ size: [thickness, bowlSize, 50] })
-        ),
-        translate(
-          [-(bowlSize + thickness) / 2, 0, -(50 + thickness) / 2],
-          cuboid({ size: [thickness, bowlSize, 50] })
-        )
-      ),
+      cuboid({ size: [bowlSize, bowlSize, height] }),
       translate(
-        [0, 0, -90],
+        [0, 0, -70],
         rotateX(
           degToRad(10),
           cuboid({ size: [bowlSize + thickness * 2, bowlSize * 2, bowlSize] })
