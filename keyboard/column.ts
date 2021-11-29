@@ -74,7 +74,7 @@ const placeKey = (n: number, model: Geom3) => {
   );
 };
 
-const screwHoleRadius = 3.3 / 2;
+const screwHoleRadius = 2.5 / 2;
 const placeBetweenRow = (n: number, model: Geom3) => {
   const models = [
     rotateX(degToRad(deg * 2 - deg / 2), translate([0, 30.5, -6.7], model)),
@@ -122,7 +122,7 @@ export const main = () => {
   const holderBase = translate(
     [0, 0, -(4 + holderHeight) / 2],
     subtract(
-      cuboid({ size: [23, 5, holderHeight] }),
+      cuboid({ size: [23, 3.3, holderHeight] }),
       cylinder({ radius: screwHoleRadius, height: holderHeight })
     )
   );
@@ -130,7 +130,7 @@ export const main = () => {
   const holder1 = place(() => placeBetweenRow(4, holderBase)[0]);
   const holder2 = intersect(place(() => placeBetweenRow(4, holderBase)[2]));
 
-  return holder1;
-  // return (place(createColumn), holder1, holder2);
-  return createColumn(4);
+  // return holder2;
+  // return union(place(createColumn), holder1, holder2);
+  return createColumn(5);
 };
