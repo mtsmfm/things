@@ -8,7 +8,7 @@ import {
   maths,
   utils,
 } from "@jscad/modeling";
-export * from "@jscad/modeling/src/maths/types";
+export { Vec2, Vec3 } from "@jscad/modeling/src/maths/types";
 
 export const { cylinder, cuboid, rectangle } = primitives;
 export const { rotate, align, translate, center } = transforms;
