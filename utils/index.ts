@@ -11,7 +11,7 @@ import {
 export { Vec2, Vec3 } from "@jscad/modeling/src/maths/types";
 
 export const { cylinder, cuboid, rectangle } = primitives;
-export const { rotate, align, translate, center } = transforms;
+export const { rotate, align, translate, center, mirror } = transforms;
 export const { subtract, union } = booleans;
 export const { extrudeFromSlices, slice } = extrusions;
 export const { expand } = expansions;
