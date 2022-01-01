@@ -10,7 +10,7 @@ import {
 } from "@jscad/modeling";
 export * from "@jscad/modeling/src/maths/types";
 
-export const { cylinder, cuboid } = primitives;
+export const { cylinder, cuboid, rectangle } = primitives;
 export const { rotate, align, translate, center } = transforms;
 export const { subtract, union } = booleans;
 export const { extrudeFromSlices, slice } = extrusions;

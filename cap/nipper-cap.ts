@@ -1,21 +1,13 @@
 import {
-  primitives,
-  transforms,
-  booleans,
-  utils,
-  extrusions,
-  expansions,
-  geometries,
-  maths,
-} from "@jscad/modeling";
-
-const { rectangle } = primitives;
-const { align } = transforms;
-const { subtract } = booleans;
-const { extrudeFromSlices, slice } = extrusions;
-const { expand } = expansions;
-const { geom2 } = geometries;
-const { mat4 } = maths;
+  extrudeFromSlices,
+  subtract,
+  align,
+  expand,
+  mat4,
+  slice,
+  geom2,
+  rectangle,
+} from "../utils";
 
 const thickness = 1.5;
 const offset = 0.4;
