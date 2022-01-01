@@ -1,19 +1,20 @@
 import { watch } from "chokidar";
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
 
-const runCommand = (command: string) => {
+const runCommand = async (command: string) => {
   try {
-    execSync(command);
+    await promisify(exec)(command);
   } catch (e) {
     console.error((e as any).stderr.toString());
   }
 };
 
-watch("**/*.ts", { ignored: "index.ts" }).on("change", (path) => {
-  runCommand("tsc");
+watch("**/*.ts", { ignored: "index.ts" }).on("change", async (path) => {
+  await runCommand("tsc");
   const js = path.substr(0, path.lastIndexOf(".")) + ".js";
   const json = path.substr(0, path.lastIndexOf(".")) + ".jscad.json";
   const stl = path.substr(0, path.lastIndexOf(".")) + ".stl";
-  runCommand(`jscad ${js} -o ${json}`);
+  await runCommand(`jscad ${js} -o ${json}`);
   runCommand(`jscad ${json} -o ${stl}`);
 });
