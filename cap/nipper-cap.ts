@@ -10,7 +10,7 @@ import {
 } from "../utils";
 
 const thickness = 1.5;
-const offset = 0.4;
+const offset = 0.2;
 
 const nipper = extrudeFromSlices(
   {
@@ -24,7 +24,7 @@ const nipper = extrudeFromSlices(
       const transformMatrix = mat4.fromTranslation(mat4.create(), [
         0,
         { 0: 0, 1: 0, 2: 10 }[index]!,
-        { 0: 0, 1: 11, 2: 22 }[index]!,
+        { 0: 0, 1: 16, 2: 27 }[index]!,
       ]);
 
       return slice.transform(
