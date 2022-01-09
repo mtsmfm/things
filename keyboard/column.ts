@@ -103,7 +103,7 @@ const placeBetweenRow = (n: number, model: Geom3) => {
   return models;
 };
 
-const createColumn = (n: number) => {
+export const createColumn = (n: number) => {
   const screwHoles = placeBetweenRow(
     n,
     cylinder({ radius: screwHoleRadius, height: 50 })
@@ -348,7 +348,7 @@ export const buildThumbSet = ({
   );
 
   return translate(
-    [0, -58, 5],
+    [-20, -58, 5],
     subtract(
       union(
         thumbObjects,
