@@ -48,7 +48,7 @@ const deg = 18;
 const space = 8;
 const switchSize = 14;
 const width = 18;
-const poleRadius = 3.5;
+const poleRadius = 4;
 
 const baseSize = space + switchSize;
 const thumbBaseSize = baseSize - 3;
@@ -90,7 +90,7 @@ const placeKey = (n: number, model: Geom3) => {
 const screwHoleRadius = 2.5 / 2;
 const placeBetweenRow = (n: number, model: Geom3) => {
   const models = [
-    rotateX(degToRad(deg * 2 - deg / 2), translate([0, 31.5, -6.7], model)),
+    rotateX(degToRad(deg * 2 - deg / 2), translate([0, 31.5, -8], model)),
     rotateX(degToRad(deg - deg / 2), translate([0, 11, -1], model)),
     rotateX(-degToRad(deg - deg / 2), translate([0, -11, -1], model)),
   ];
@@ -151,8 +151,8 @@ const joystickBox = cuboid({ size: [21, 25, 15] });
 const joystick = union(
   joystickPcb,
   translate([0, 0, (15 + 1.5) / 2], joystickBox),
-  translate([0, 0, 20], rotateX(degToRad(180), joystickBaseFn())),
-  translate([0, 0, 24.5], joystickCapFn())
+  translate([0, 0, 18], rotateX(degToRad(180), joystickBaseFn())),
+  translate([0, 0, 22.5], joystickCapFn())
 );
 
 const corners = (obj: Geom3) => {
@@ -164,7 +164,7 @@ const corners = (obj: Geom3) => {
   );
 };
 
-const holderHeight = 5;
+const holderHeight = 3;
 const holderBase = translate(
   [0, 0, -(4 + holderHeight) / 2],
   intersect(
@@ -217,14 +217,16 @@ const poleBase = translate(
   )
 );
 
-const poles1 = place(() => placeBetweenRow(4, poleBase)[0]);
+const poles1 = place(
+  () => placeBetweenRow(4, rotateZ(degToRad(180), poleBase))[0]
+);
 const poles2 = place(() => placeBetweenRow(4, poleBase)[2]);
-const basePlate = cuboid({ size: [140, 20, 4] });
+const basePlate = cuboid({ size: [140, 20, 3] });
 const basePlate1 = rotate(
   [0, 0, degToRad(-6)],
-  translate([40, 48, -10], basePlate)
+  translate([40, 48, -8], basePlate)
 );
-const basePlate2 = translate([45, -15, -10], basePlate);
+const basePlate2 = translate([45, -15, -8], basePlate);
 
 export const base1 = subtract(
   union(
@@ -232,7 +234,7 @@ export const base1 = subtract(
     ...poles1,
     subtract(basePlate1, ...poles1.map((p) => hull(p, p)))
   ),
-  translate([45, 46, -10 - (50 + 4) / 2], cuboid({ size: [200, 30, 50] }))
+  translate([45, 46, -8 - (50 + 3) / 2], cuboid({ size: [200, 30, 50] }))
 );
 
 export const base2 = subtract(
@@ -241,34 +243,34 @@ export const base2 = subtract(
     ...poles2,
     subtract(basePlate2, ...poles2.map((p) => hull(p, p)))
   ),
-  translate([45, -15, -10 - (50 + 4) / 2], cuboid({ size: [200, 30, 50] }))
+  translate([45, -15, -8 - (50 + 3) / 2], cuboid({ size: [200, 30, 50] }))
 );
 
 export const thumbKeys = subtract(
-  union(
+  hull(
     ...Array.from({ length: 2 }).flatMap((_, i) =>
       Array.from({ length: 3 }).flatMap((_, j) =>
         translate(
           [(width + 2) * i, -thumbBaseSize * j, 0],
-          subtract(
-            cuboid({ size: [width, thumbBaseSize, height] }),
-            keySwitchHole
-          )
+          cuboid({ size: [width, thumbBaseSize, height] })
         )
       )
     )
   ),
   ...Array.from({ length: 2 }).flatMap((_, i) =>
-    Array.from({ length: 2 }).flatMap((_, j) =>
-      translate(
-        [(width + 2) * i, -thumbBaseSize * j - thumbBaseSize / 2, 0],
-        cylinder({ height: height, radius: screwHoleRadius }),
-        cylinder({
-          height: 1,
-          radius: 4.5 / 2,
-          center: [0, 0, (height - 1) / 2],
-        })
-      )
+    Array.from({ length: 3 }).flatMap((_, j) =>
+      translate([(width + 2) * i, -thumbBaseSize * j, 0], keySwitchHole)
+    )
+  ),
+  ...Array.from({ length: 2 }).flatMap((_, j) =>
+    translate(
+      [(width + 2) / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
+      cylinder({ height: height, radius: screwHoleRadius }),
+      cylinder({
+        height: 1,
+        radius: 4.5 / 2,
+        center: [0, 0, (height - 1) / 2],
+      })
     )
   )
 );
@@ -334,14 +336,12 @@ export const buildThumbSet = ({
       )
     ),
     translate(
-      [25, 17, 10],
+      [23, 17, 10],
       ...compact([renderThumbKeys ? thumbKeys : undefined]),
-      ...Array.from({ length: 2 }).flatMap((_, i) =>
-        Array.from({ length: 2 }).flatMap((_, j) =>
-          translate(
-            [(width + 2) * i, -thumbBaseSize * j - thumbBaseSize / 2, 0],
-            rotateZ(degToRad(180), union(poleBase, holderBase))
-          )
+      ...Array.from({ length: 2 }).flatMap((_, j) =>
+        translate(
+          [(width + 2) / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
+          rotateZ(degToRad(180), union(poleBase, holderBase))
         )
       )
     )
@@ -353,12 +353,12 @@ export const buildThumbSet = ({
       union(
         thumbObjects,
         subtract(
-          translate([25, 13, -15], cuboid({ size: [70, 40, height] })),
+          translate([15, 14.5, -13], cuboid({ size: [50, 38, 3] })),
           thumbObjects.map((o) => hull(o, o))
         )
       ),
       translate(
-        [25, 13, -15 - (100 + 4) / 2],
+        [25, 13, -13 - (100 + 3) / 2],
         cuboid({ size: [200, 100, 100] })
       )
     )
