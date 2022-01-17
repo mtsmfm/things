@@ -1,31 +1,17 @@
 import {
-  primitives,
-  transforms,
-  booleans,
-  utils,
-  extrusions,
-} from "@jscad/modeling";
-
-const {
-  cuboid,
-  cylinder,
-  cylinderElliptic,
-  roundedCuboid,
-  roundedCylinder,
-  polygon,
+  union,
+  translate,
   torus,
-} = primitives;
-const { rotate, translate } = transforms;
-const { subtract, union } = booleans;
-const { degToRad } = utils;
-const { extrudeLinear } = extrusions;
-
-type Vec2 = [number, number];
-type Vec3 = [number, number, number];
+  cylinder,
+  subtract,
+  cuboid,
+  rotate,
+  degToRad,
+} from "../utils";
 
 const capHeight = 3;
 const shaftHeight = 4;
-const segments = 32 * 4;
+const segments = 32;
 const capRadius = 23 / 2;
 
 const flatBaseRoundedCylinder = ({
@@ -80,7 +66,7 @@ const cap = union(
 );
 
 const shaft = subtract(
-  cylinder({ radius: 5.5 / 2, height: shaftHeight, segments })
+  cylinder({ radius: 6 / 2, height: shaftHeight, segments })
 );
 
 const chamferSize = 0.7;
