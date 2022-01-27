@@ -2,7 +2,7 @@ import { subtract, cylinder, align, torus, union, cuboid } from "../utils";
 
 const buttonRadius = 13 / 2;
 const thickness = 1.5;
-const offset = 0.4;
+const offset = 0.2;
 const torusInnerRadius = 1.5;
 export const innerRadius = buttonRadius - thickness / 2 - torusInnerRadius;
 
