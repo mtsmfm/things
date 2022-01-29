@@ -16,7 +16,8 @@ const button = subtract(
       align(
         { modes: ["center", "center", "max"] },
         cylinder({ height: buttonHeight, radius: innerRadius, segments: 6 }),
-        cylinder({ height: 1, radius: innerRadius - 0.5, segments: 6 })
+        cylinder({ height: 0.5, radius: innerRadius - 0.5, segments: 6 }),
+        cylinder({ height: buttonHeight, radius: 3 / 2, segments: 6 })
       )
     ),
     cuboid({
