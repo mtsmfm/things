@@ -40,4 +40,4 @@ export const { degToRad } = utils;
 export const { geom2 } = geometries;
 export const { mat4 } = maths;
 export const { colorize, colorNameToRgb } = colors;
-export const { hull } = hulls;
+export const { hull, hullChain } = hulls;
