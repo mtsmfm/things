@@ -17,6 +17,7 @@ import {
   subtract,
   mirror,
   colorize,
+  hullChain,
 } from "../utils";
 import { main as joystickBaseFn } from "./joystick-base";
 import { main as joystickCapFn } from "./joystick-cap";
@@ -246,25 +247,38 @@ export const base2 = subtract(
   translate([45, -15, -8 - (50 + 3) / 2], cuboid({ size: [200, 30, 50] }))
 );
 
+const thumbMatrix = [
+  [1, 0],
+  [0, 0],
+  [0, 1],
+  [0, 2],
+  // [1, 1],
+  // [2, 1],
+];
+
 export const thumbKeys = subtract(
-  hull(
-    ...Array.from({ length: 2 }).flatMap((_, i) =>
-      Array.from({ length: 3 }).flatMap((_, j) =>
+  union(
+    hullChain(
+      ...thumbMatrix.map(([i, j]) =>
         translate(
-          [(width + 2) * i, -thumbBaseSize * j, 0],
+          [thumbBaseSize * i, -thumbBaseSize * j, 0],
           cuboid({ size: [width, thumbBaseSize, height] })
         )
       )
+    ),
+    ...Array.from({ length: 2 }).flatMap((_, j) =>
+      translate(
+        [thumbBaseSize / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
+        cylinder({ height: height, radius: poleRadius })
+      )
     )
   ),
-  ...Array.from({ length: 2 }).flatMap((_, i) =>
-    Array.from({ length: 3 }).flatMap((_, j) =>
-      translate([(width + 2) * i, -thumbBaseSize * j, 0], keySwitchHole)
-    )
+  ...thumbMatrix.map(([i, j]) =>
+    translate([thumbBaseSize * i, -thumbBaseSize * j, 0], keySwitchHole)
   ),
   ...Array.from({ length: 2 }).flatMap((_, j) =>
     translate(
-      [(width + 2) / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
+      [thumbBaseSize / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
       cylinder({ height: height, radius: screwHoleRadius }),
       cylinder({
         height: 1,
@@ -320,40 +334,48 @@ export const buildThumbSet = ({
   renderJoyStickPlate: boolean;
   renderThumbKeys: boolean;
 }) => {
-  const thumbObjects = rotate(
-    [degToRad(35), 0, degToRad(15)],
-    ...compact([renderJoyStick ? joystick : undefined]),
-    translate(
-      [0, 0, -(3 + 1.5) / 2],
-      ...compact([renderJoyStickPlate ? joystickPlate : undefined]),
-      translate(
-        [0, 0, -(3 + 1) / 2 + (height - 1) / 2],
-        rotateZ(
-          degToRad(180),
-          translate([0, -7, 0], union(poleBase, holderBase)),
-          translate([0, 7, 0], union(poleBase, holderBase))
+  const thumbObjects = [
+    ...translate(
+      [38, 1, 7],
+      rotate(
+        [degToRad(5), degToRad(-45), degToRad(20)],
+        ...compact([renderJoyStick ? joystick : undefined]),
+        translate(
+          [0, 0, -(3 + 1.5) / 2],
+          ...compact([renderJoyStickPlate ? joystickPlate : undefined]),
+          translate(
+            [0, 0, -(3 + 1) / 2 + (height - 1) / 2],
+            rotateZ(
+              degToRad(180),
+              translate([0, -7, 0], union(poleBase, holderBase)),
+              translate([0, 7, 0], union(poleBase, holderBase))
+            )
+          )
         )
       )
     ),
-    translate(
-      [23, 17, 10],
-      ...compact([renderThumbKeys ? thumbKeys : undefined]),
-      ...Array.from({ length: 2 }).flatMap((_, j) =>
-        translate(
-          [(width + 2) / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
-          rotateZ(degToRad(180), union(poleBase, holderBase))
+    ...translate(
+      [4, 14, -3],
+      rotate(
+        [degToRad(5), degToRad(-45), degToRad(20)],
+        ...compact([renderThumbKeys ? thumbKeys : undefined]),
+        ...Array.from({ length: 2 }).flatMap((_, j) =>
+          translate(
+            [thumbBaseSize / 2, -thumbBaseSize * j - thumbBaseSize / 2, 0],
+            rotateZ(degToRad(180), union(poleBase, holderBase))
+          )
         )
       )
-    )
-  );
+    ),
+  ];
 
   return translate(
-    [-20, -58, 5],
+    [-20, -52, 5],
     subtract(
       union(
         thumbObjects,
         subtract(
-          translate([15, 14.5, -13], cuboid({ size: [50, 38, 3] })),
+          translate([45, 10, -13], cuboid({ size: [40, 40, 3] })),
           thumbObjects.map((o) => hull(o, o))
         )
       ),
