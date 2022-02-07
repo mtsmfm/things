@@ -18,6 +18,7 @@ import {
   mirror,
   colorize,
   hullChain,
+  mirrorY,
 } from "../utils";
 import { main as joystickBaseFn } from "./joystick-base";
 import { main as joystickCapFn } from "./joystick-cap";
@@ -393,7 +394,7 @@ export const main = () => {
   // return thumbKeys;
   // return thumbSet;
   // return union(base1, base2);
-  return [
+  return mirrorY([
     colorize([1, 0, 0], ...place(createKeyCap)),
     ...place(createColumn),
     base1,
@@ -403,5 +404,5 @@ export const main = () => {
       renderJoyStickPlate: true,
       renderThumbKeys: true,
     }),
-  ];
+  ]);
 };

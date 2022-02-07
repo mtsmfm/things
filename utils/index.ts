@@ -12,8 +12,9 @@ import {
   measurements,
 } from "@jscad/modeling";
 export { generalize } from "@jscad/modeling/src/operations/modifiers";
-export { Vec2, Vec3 } from "@jscad/modeling/src/maths/types";
+import { Vec2, Vec3 } from "@jscad/modeling/src/maths/types";
 import { Geom2, Geom3 } from "@jscad/modeling/src/geometries/types";
+import hulljs from "hull.js";
 
 export const {
   cylinder,
@@ -43,8 +44,8 @@ export const {
   mirrorZ,
 } = transforms;
 export const { subtract, union, intersect } = booleans;
-export const { extrudeFromSlices, extrudeLinear } = extrusions;
-export const { expand } = expansions;
+export const { extrudeFromSlices, extrudeLinear, project } = extrusions;
+export const { expand, offset } = expansions;
 export const { degToRad } = utils;
 export const { geom2 } = geometries;
 export const { mat4 } = maths;
@@ -53,6 +54,7 @@ export const { hull, hullChain } = hulls;
 export const { measureBoundingBox, measureAggregateBoundingBox } = measurements;
 
 export { Geom2, Geom3 };
+export { Vec2, Vec3 };
 
 export const corners = (obj: Geom3) => {
   return [
@@ -99,7 +101,80 @@ export const onlyPositiveZ = (obj: Geom3) => {
   return intersect(obj, extrudeLinear({ height: max[2] }, bottom));
 };
 
+export const placeSideBySideY = (...geoms: Geom3[]) => {
+  return center(
+    {},
+    geoms.reduce((acc, geom) => {
+      return union(
+        align({ modes: ["none", "max", "none"] }, acc),
+        align({ modes: ["none", "min", "none"] }, geom)
+      );
+    })
+  );
+};
+
+export const placeSideBySideZ = (...geoms: Geom3[]) => {
+  return center(
+    {},
+    geoms.reduce((acc, geom) => {
+      return union(
+        align({ modes: ["none", "none", "min"] }, acc),
+        align({ modes: ["none", "none", "max"] }, geom)
+      );
+    })
+  );
+};
+
+export const concaveHullX = (...geoms: Geom3[]) => {
+  const [min, max] = measureAggregateBoundingBox(...geoms);
+  const height = Math.max(Math.abs(min[0]), Math.abs(max[0])) * 2;
+  return rotateY(
+    degToRad(90),
+    align(
+      { modes: ["none", "none", "center"] },
+      extrudeLinear(
+        { height },
+        offset(
+          { delta: -0.01 },
+          polygon({
+            points: hulljs(
+              geom2.toPoints(project({ axis: [1, 0, 0] }, union(geoms)))
+            ),
+          })
+        )
+      )
+    )
+  );
+};
+
+export const joinX = (...geoms: Geom3[]) => {
+  return replace(concaveHullX(...geoms), geoms);
+};
+
+export const cuboidElliptic = ({
+  center,
+  startSize,
+  endSize,
+  height,
+}: {
+  startSize: Vec2;
+  endSize: Vec2;
+  height: number;
+  center: Vec3;
+}) => {
+  return cylinderElliptic({
+    height,
+    startRadius: startSize.map((n) => n / Math.sqrt(2)) as Vec2,
+    endRadius: endSize.map((n) => n / Math.sqrt(2)) as Vec2,
+    segments: 4,
+    startAngle: Math.PI / 4,
+    endAngle: Math.PI / 4,
+    center: center,
+  });
+};
+
 export const m3InsertNutHoleRadius = 4.5 / 2;
 export const m2ScrewHoleRadius = 2.5 / 2;
 export const m2NutRadius = (4.6 + 0.4) / 2;
 export const m2NutHeight = 1.6 + 0.2;
+export const m2ScrewHeadRadius = 5 / 2;

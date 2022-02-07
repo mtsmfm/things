@@ -1,12 +1,5 @@
-import { base2, buildThumbSet } from "./column";
+import { base2 } from "./column-v2";
 
 export const main = () => {
-  return [
-    base2,
-    buildThumbSet({
-      renderJoyStick: false,
-      renderJoyStickPlate: false,
-      renderThumbKeys: false,
-    }),
-  ];
+  return base2;
 };
