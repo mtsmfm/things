@@ -49,37 +49,39 @@ const cornerHoles = corners(
   )
 );
 
-export const main = () => {
-  return replace(
-    align(
-      { modes: ["none", "none", "min"] },
-      replace(
-        alignSubtract(
-          cuboid({ size: [25.5, 31.5, height] }),
+export const joystickPlate = replace(
+  align(
+    { modes: ["none", "none", "min"] },
+    replace(
+      alignSubtract(
+        cuboid({ size: [25.5, 31.5, height] }),
+        [
           [
-            [
-              { modes: ["none", "max", "none"] },
-              { modes: ["none", "min", "none"] },
-            ],
-            cuboid({ size: [13, 3, height] }),
+            { modes: ["none", "max", "none"] },
+            { modes: ["none", "min", "none"] },
           ],
-          [
-            { modes: ["center", "center", "max"] },
-            cuboid({ size: [24, 22, height - thickness] }),
-          ]
-        ),
-        cornerHoles
-      )
+          cuboid({ size: [13, 3, height] }),
+        ],
+        [
+          { modes: ["center", "center", "max"] },
+          cuboid({ size: [24, 22, height - thickness] }),
+        ]
+      ),
+      cornerHoles
+    )
+  ),
+  [
+    align(
+      { modes: ["none", "center", "min"], relativeTo: [0, 7, 0] as any },
+      m2NutHolder
     ),
-    [
-      align(
-        { modes: ["none", "center", "min"], relativeTo: [0, 7, 0] as any },
-        m2NutHolder
-      ),
-      align(
-        { modes: ["none", "center", "min"], relativeTo: [0, -7, 0] as any },
-        m2NutHolder
-      ),
-    ]
-  );
+    align(
+      { modes: ["none", "center", "min"], relativeTo: [0, -7, 0] as any },
+      m2NutHolder
+    ),
+  ]
+);
+
+export const main = () => {
+  return joystickPlate;
 };

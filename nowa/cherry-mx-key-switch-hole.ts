@@ -6,9 +6,9 @@ const height = 4;
 export const cherryMxKeySwitchHole = placeSideBySideY(
   ...align(
     { modes: ["none", "none", "min"] },
-    cuboid({ size: [5, 1.5, 2.5] }),
+    cuboid({ size: [5, 1, 2.5] }),
     cuboid({ size: [switchSize, switchSize, height] }),
-    cuboid({ size: [5, 1.5, 2.5] })
+    cuboid({ size: [5, 1, 2.5] })
   )
 );
 

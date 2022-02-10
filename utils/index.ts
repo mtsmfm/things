@@ -26,6 +26,7 @@ export const {
   torus,
   polygon,
   polyhedron,
+  roundedRectangle,
 } = primitives;
 export const {
   rotate,
@@ -88,17 +89,19 @@ export const alignSubtract = (
   }, obj);
 };
 
-export const onlyPositiveZ = (obj: Geom3) => {
-  const [min, max] = measureBoundingBox(obj);
+export const onlyPositiveZ = (...geoms: Geom3[]) => {
+  return geoms.map((geom) => {
+    const [min, max] = measureBoundingBox(geom);
 
-  const bottom = rectangle({
-    size: [
-      Math.max(Math.abs(max[0]), Math.abs(min[0])) * 2,
-      Math.max(Math.abs(max[1]), Math.abs(min[1])) * 2,
-    ],
+    const bottom = rectangle({
+      size: [
+        Math.max(Math.abs(max[0]), Math.abs(min[0])) * 2,
+        Math.max(Math.abs(max[1]), Math.abs(min[1])) * 2,
+      ],
+    });
+
+    return intersect(geom, extrudeLinear({ height: max[2] }, bottom));
   });
-
-  return intersect(obj, extrudeLinear({ height: max[2] }, bottom));
 };
 
 export const placeSideBySideY = (...geoms: Geom3[]) => {
@@ -128,22 +131,25 @@ export const placeSideBySideZ = (...geoms: Geom3[]) => {
 export const concaveHullX = (...geoms: Geom3[]) => {
   const [min, max] = measureAggregateBoundingBox(...geoms);
   const height = Math.max(Math.abs(min[0]), Math.abs(max[0])) * 2;
-  return rotateY(
-    degToRad(90),
-    align(
-      { modes: ["none", "none", "center"] },
-      extrudeLinear(
-        { height },
-        offset(
-          { delta: -0.01 },
-          polygon({
-            points: hulljs(
-              geom2.toPoints(project({ axis: [1, 0, 0] }, union(geoms)))
-            ),
-          })
+  return intersect(
+    rotateY(
+      degToRad(90),
+      align(
+        { modes: ["none", "none", "center"] },
+        extrudeLinear(
+          { height },
+          offset(
+            { delta: -0.01 },
+            polygon({
+              points: hulljs(
+                geom2.toPoints(project({ axis: [1, 0, 0] }, union(geoms)))
+              ),
+            })
+          )
         )
       )
-    )
+    ),
+    union(hullChain(geoms))
   );
 };
 
@@ -174,6 +180,7 @@ export const cuboidElliptic = ({
 };
 
 export const m3InsertNutHoleRadius = 4.5 / 2;
+export const m2InsertNutHoleRadius = 3 / 2;
 export const m2ScrewHoleRadius = 2.5 / 2;
 export const m2NutRadius = (4.6 + 0.4) / 2;
 export const m2NutHeight = 1.6 + 0.2;
