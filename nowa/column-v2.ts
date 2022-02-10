@@ -19,12 +19,13 @@ import {
   onlyPositiveZ,
   placeSideBySideZ,
   intersect,
-  rotateZ,
   colorize,
   cuboidElliptic,
   roundedRectangle,
   extrudeLinear,
   hull,
+  projectAndCut,
+  offset,
 } from "../utils";
 import { cherryMxKeySwitchHole } from "./cherry-mx-key-switch-hole";
 import { main as joystickBaseFn } from "./joystick-base";
@@ -37,6 +38,7 @@ const contouredKeySwitchHolderBaseSize = keySwitchHolderWidth + 5;
 const thumbKeySwitchHolderWidth = keySwitchHolderWidth + 1;
 const contouredDeg = 18;
 const poleRadius = 4;
+const plateHeight = 3;
 
 const contoured = (
   {
@@ -348,35 +350,21 @@ const poles1 = onlyPositiveZ(
   )
 );
 
-export const base1 = replace(
-  align(
-    { modes: ["min", "min", "min"], relativeTo: [-28, -60, 0] as any },
-    rotateZ(degToRad(6), cuboid({ size: [145, 20, 3] }))
-  ),
-  poles1
-);
-
-export const base2 = onlyPositiveZ(
-  replace(
-    align(
-      { modes: ["min", "min", "min"], relativeTo: [-23, 4, 0] as any },
-      rotateZ(degToRad(-1), cuboid({ size: [140, 20, 3] }))
-    ),
-    createMatrix(() =>
-      contouredBetween(
-        {
-          n: 1,
-          deg: contouredDeg,
-          baseSize: contouredKeySwitchHolderBaseSize,
-          spaceSize: contouredKeySwitchHolderBaseSize - keySwitchHolderWidth,
-        },
-        union(
-          align(
-            {
-              modes: ["none", "none", "max"],
-            },
-            columnPole
-          )
+const poles2 = onlyPositiveZ(
+  ...createMatrix(() =>
+    contouredBetween(
+      {
+        n: 1,
+        deg: contouredDeg,
+        baseSize: contouredKeySwitchHolderBaseSize,
+        spaceSize: contouredKeySwitchHolderBaseSize - keySwitchHolderWidth,
+      },
+      union(
+        align(
+          {
+            modes: ["none", "none", "max"],
+          },
+          columnPole
         )
       )
     )
@@ -555,30 +543,33 @@ const joystickBase = transformJoystick(
   )
 );
 
-export const base3 = onlyPositiveZ(
-  replace(
-    subtract(
-      align(
-        { modes: ["min", "min", "min"], relativeTo: [6, 25, 0] as any },
-        rotateZ(degToRad(-1), cuboid({ size: [53, 45, 3] }))
-      )
-    ),
-    [...thumbKeysBase1, thumbKeysBase2, ...joystickBase]
-  )
+const poles3 = onlyPositiveZ(
+  ...thumbKeysBase1,
+  thumbKeysBase2,
+  ...joystickBase
 );
 
-const base = [
-  base1,
-  base2,
-  base3,
-  align(
-    { modes: ["min", "min", "min"], relativeTo: [-25, -43, 0] as any },
-    cuboid({ size: [53, 55, 3] })
+const poles = [...poles1, ...poles2, ...poles3];
+
+export const plate = [
+  replace(
+    union(
+      extrudeLinear(
+        { height: plateHeight },
+        offset({ delta: 1 }, projectAndCut(hull(poles1))),
+        offset({ delta: 1 }, projectAndCut(hull(poles2))),
+        offset({ delta: 1 }, projectAndCut(hull(poles3))),
+        projectAndCut(hull(poles1[0], poles2[5])),
+        projectAndCut(hull(poles1[5], poles2[0])),
+        projectAndCut(hull(poles2[0], poles3[0])),
+        projectAndCut(hull(poles2[2], poles3[2]))
+      )
+    ),
+    ...poles
   ),
 ];
 
 export const main = () => {
-  return base;
   return [
     transformThumbKeys1(
       align({ modes: ["none", "none", "min"] }, thumbKeysHolder1)
@@ -609,6 +600,6 @@ export const main = () => {
       })
     ),
     createMatrix(createColumn),
-    base,
+    plate,
   ];
 };

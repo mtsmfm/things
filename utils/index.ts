@@ -66,14 +66,29 @@ export const corners = (obj: Geom3) => {
   ];
 };
 
-export const replace = (a: Geom3, b: Geom3 | Geom3[]) => {
-  return union(
-    subtract(
-      a,
-      [b].flat().map((x) => hull(x, x))
-    ),
-    b
-  );
+export const replace = (a: Geom3, ...bs: Geom3[]) => {
+  try {
+    return union(subtract(a, union(bs.map((b) => hull(b, b)))), bs);
+  } catch {
+    // XXX
+    //   out[0] = a[0] - b[0]
+    //             ^
+    // TypeError: Cannot read properties of undefined (reading '0')
+    return bs.reduce((acc, b) => union(subtract(acc, hull(b, b)), b), a);
+  }
+};
+
+export const projectAndCut = (geom: Geom3) => {
+  const [min, max] = measureBoundingBox(geom);
+
+  const bottom = rectangle({
+    size: [
+      Math.max(Math.abs(max[0]), Math.abs(min[0])) * 2,
+      Math.max(Math.abs(max[1]), Math.abs(min[1])) * 2,
+    ],
+  });
+
+  return project({}, intersect(geom, extrudeLinear({ height: 0.01 }, bottom)));
 };
 
 type AlignOption = Parameters<typeof align>["0"];
@@ -154,7 +169,7 @@ export const concaveHullX = (...geoms: Geom3[]) => {
 };
 
 export const joinX = (...geoms: Geom3[]) => {
-  return replace(concaveHullX(...geoms), geoms);
+  return replace(concaveHullX(...geoms), ...geoms);
 };
 
 export const cuboidElliptic = ({
