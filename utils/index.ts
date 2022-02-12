@@ -27,6 +27,7 @@ export const {
   polygon,
   polyhedron,
   roundedRectangle,
+  arc,
 } = primitives;
 export const {
   rotate,

@@ -26,6 +26,7 @@ import {
   hull,
   projectAndCut,
   offset,
+  circle,
 } from "../utils";
 import { cherryMxKeySwitchHole } from "./cherry-mx-key-switch-hole";
 import { main as joystickBaseFn } from "./joystick-base";
@@ -36,7 +37,7 @@ const keySwitchHolderWidth = 18;
 const keySwitchHolderHeight = 4;
 const contouredKeySwitchHolderBaseSize = keySwitchHolderWidth + 5;
 const thumbKeySwitchHolderWidth = keySwitchHolderWidth + 1;
-const contouredDeg = 18;
+export const contouredDeg = 18;
 const poleRadius = 4;
 const plateHeight = 3;
 
@@ -160,21 +161,26 @@ export const createColumn = (count: number) => {
           baseSize: contouredKeySwitchHolderBaseSize,
           spaceSize: contouredKeySwitchHolderBaseSize - keySwitchHolderWidth,
         },
-        union(
-          align(
-            {
-              modes: ["none", "none", "max"],
-              relativeTo: [0, 0, keySwitchHolderHeight] as any,
-            },
-            cylinder({
-              radius: m2NutRadius,
-              height: m2NutHeight,
-              segments: 6,
-            }),
-            cylinder({
-              radius: m2ScrewHoleRadius,
-              height: keySwitchHolderHeight,
-            })
+        align(
+          {
+            modes: ["none", "none", "max"],
+            relativeTo: [0, 0, keySwitchHolderHeight] as any,
+          },
+          union(
+            align(
+              {
+                modes: ["none", "none", "center"],
+              },
+              cylinder({
+                radius: m2NutRadius + 0.1,
+                height: m2NutHeight + 1,
+                segments: 6,
+              }),
+              cylinder({
+                radius: m2ScrewHoleRadius,
+                height: keySwitchHolderHeight,
+              })
+            )
           )
         )
       )
@@ -217,81 +223,49 @@ const columnPole = subtract(
   })
 );
 
-const thumbPole1 = subtract(
-  placeSideBySideZ(
-    intersect(
-      cylinder({
-        height: 1.5,
-        radius: poleRadius,
-      }),
-      union(
-        cuboid({ size: [poleRadius * 2, 1, 1.5] }),
-        cuboid({ size: [1, poleRadius * 2, 1.5] })
-      )
-    ),
-    subtract(
-      align(
-        { modes: ["none", "none", "max"] },
-        cylinder({
-          height: 50,
+const createThumbPole = ({
+  startAngle,
+  endAngle,
+}: {
+  startAngle: number;
+  endAngle: number;
+}) => {
+  return subtract(
+    placeSideBySideZ(
+      extrudeLinear(
+        { height: 3 },
+        circle({
+          startAngle,
+          endAngle,
           radius: poleRadius,
         })
       ),
-      align(
-        {
-          modes: ["none", "none", "max"],
-          relativeTo: [0, 0, -(9 - 1.5 - keySwitchHolderHeight)] as any,
-        },
-        cylinder({
-          height: 50,
-          radius: m2ScrewHeadRadius,
-        })
-      )
-    )
-  ),
-  cylinder({
-    height: 53,
-    radius: m2ScrewHoleRadius,
-  })
-);
-
-const thumbPole2 = subtract(
-  placeSideBySideZ(
-    intersect(
-      cylinder({
-        height: 1.5,
-        radius: poleRadius,
-      }),
-      union(
-        // cuboid({ size: [poleRadius * 2, 1, 1.5] }),
-        cuboid({ size: [1, poleRadius * 2, 1.5] })
+      subtract(
+        align(
+          { modes: ["none", "none", "max"] },
+          cylinder({
+            height: 50,
+            radius: poleRadius,
+          })
+        ),
+        align(
+          {
+            modes: ["none", "none", "max"],
+            relativeTo: [0, 0, -(9 - 3 - keySwitchHolderHeight)] as any,
+          },
+          cylinder({
+            height: 50,
+            radius: m2ScrewHeadRadius,
+          })
+        )
       )
     ),
-    subtract(
-      align(
-        { modes: ["none", "none", "max"] },
-        cylinder({
-          height: 50,
-          radius: poleRadius,
-        })
-      ),
-      align(
-        {
-          modes: ["none", "none", "max"],
-          relativeTo: [0, 0, -(9 - 1.5 - keySwitchHolderHeight)] as any,
-        },
-        cylinder({
-          height: 50,
-          radius: m2ScrewHeadRadius,
-        })
-      )
-    )
-  ),
-  cylinder({
-    height: 53,
-    radius: m2ScrewHoleRadius,
-  })
-);
+    cylinder({
+      height: 53,
+      radius: m2ScrewHoleRadius,
+    })
+  );
+};
 
 const joystickPole = subtract(
   subtract(
@@ -425,117 +399,134 @@ export const thumbKeysHolder1 = (() => {
           )
         ),
         keyPositions.map(([x, y]) => translate([x, y], cherryMxKeySwitchHole)),
-        cylinder({
-          radius: m2ScrewHoleRadius,
-          height: keySwitchHolderHeight,
-          center: [
-            thumbKeySwitchHolderWidth / 2,
-            thumbKeySwitchHolderWidth / 2,
-            0,
-          ],
-        }),
-        cylinder({
-          radius: m2NutRadius,
-          height: m2NutHeight,
-          center: [
-            thumbKeySwitchHolderWidth / 2,
-            thumbKeySwitchHolderWidth / 2,
-            0,
-          ],
-          segments: 6,
-        }),
-        cylinder({
-          radius: m2ScrewHoleRadius,
-          height: keySwitchHolderHeight,
-          center: [
-            thumbKeySwitchHolderWidth / 2,
-            (thumbKeySwitchHolderWidth / 2) * 3,
-            0,
-          ],
-        }),
-        cylinder({
-          radius: m2NutRadius,
-          height: m2NutHeight,
-          center: [
-            thumbKeySwitchHolderWidth / 2,
-            (thumbKeySwitchHolderWidth / 2) * 3,
-            0,
-          ],
-          segments: 6,
-        })
+        union(
+          polePositions.map(([x, y]) =>
+            translate(
+              [x, y],
+              cylinder({
+                radius: m2ScrewHoleRadius,
+                height: keySwitchHolderHeight,
+              }),
+              cylinder({
+                radius: m2NutRadius + 0.2,
+                height: m2NutHeight + 1,
+                segments: 6,
+              })
+            )
+          )
+        )
       )
     )
   );
 })();
 
-export const thumbKeysHolder2 = align(
-  { modes: ["none", "none", "min"] },
-  subtract(
-    align(
-      { modes: ["none", "none", "max"] },
-      joinX(
-        ...[0, 1].map((i) =>
-          translate([i * thumbKeySwitchHolderWidth], keySwitchHolder)
+export const thumbKeysHolder2 = (() => {
+  const keyPositions = [
+    [0, 0],
+    [thumbKeySwitchHolderWidth, 0],
+  ];
+
+  const polePositions = [
+    [-thumbKeySwitchHolderWidth / 2, 0],
+    [(thumbKeySwitchHolderWidth / 2) * 3, 0],
+  ];
+
+  return align(
+    { modes: ["none", "none", "min"] },
+    subtract(
+      align(
+        { modes: ["none", "none", "max"] },
+        union(
+          align(
+            { modes: ["none", "none", "max"] },
+            joinX(
+              ...keyPositions.map(([x, y]) =>
+                translate([x, y], hull(keySwitchHolder, keySwitchHolder))
+              )
+            ),
+            polePositions.map(([x, y]) =>
+              cylinder({
+                radius: poleRadius,
+                center: [x, y, 0],
+                height: keySwitchHolderHeight,
+              })
+            )
+          )
+        ),
+        ...keyPositions.map(([x, y]) =>
+          translate([x, y], cherryMxKeySwitchHole)
+        ),
+        union(
+          polePositions.map(([x, y]) =>
+            translate(
+              [x, y],
+              cylinder({
+                radius: m2ScrewHoleRadius,
+                height: keySwitchHolderHeight,
+              }),
+              cylinder({
+                radius: m2NutRadius + 0.2,
+                height: m2NutHeight + 1,
+                segments: 6,
+              })
+            )
+          )
         )
-      ),
-      cylinder({
-        radius: m2NutRadius,
-        height: m2NutHeight,
-        center: [thumbKeySwitchHolderWidth / 2, 0, 0],
-        segments: 6,
-      }),
-      cylinder({
-        radius: m2ScrewHoleRadius,
-        height: keySwitchHolderHeight,
-        center: [thumbKeySwitchHolderWidth / 2, 0, 0],
-      })
+      )
     )
-  )
-);
+  );
+})();
 
 const transformThumbKeys1 = (geom: Geom3 | Geom3[]) => {
   return translate(
-    [-12, 36, 9],
-    rotate([degToRad(-3), degToRad(-45), degToRad(-20)], geom)
+    [-10, 39, 8],
+    rotate([degToRad(-1), degToRad(-45), degToRad(-20)], geom)
   );
 };
 
-const transformThumbKeys2 = (geom: Geom3) => {
+const transformThumbKeys2 = (geom: Geom3 | Geom3[]) => {
   return translate(
-    [28, 77, 15],
-    rotate([degToRad(-3), degToRad(-45), degToRad(-20)], geom)
+    [27, 78, 17],
+    rotate([degToRad(-1), degToRad(-45), degToRad(-20)], geom)
   );
 };
 
 const transformJoystick = (geom: Geom3 | Geom3[]) => {
   return translate(
-    [27, 49, 15],
-    rotate([degToRad(-3), degToRad(-45), degToRad(-20)], geom)
+    [28, 52, 15],
+    rotate([degToRad(-1), degToRad(-45), degToRad(-20)], geom)
   );
 };
 
-const thumbKeysBase1 = transformThumbKeys1(
+const thumbPoles1 = transformThumbKeys1(
   align(
     { modes: ["none", "none", "max"] },
     translate(
       [thumbKeySwitchHolderWidth / 2, thumbKeySwitchHolderWidth / 2, 0],
-      thumbPole1
+      createThumbPole({ startAngle: degToRad(0), endAngle: degToRad(90) })
     ),
     translate(
       [thumbKeySwitchHolderWidth / 2, (thumbKeySwitchHolderWidth / 2) * 3, 0],
-      thumbPole1
+      createThumbPole({ startAngle: degToRad(270), endAngle: degToRad(90) })
     )
   )
 );
 
-const thumbKeysBase2 = transformThumbKeys2(
+const thumbPoles2 = transformThumbKeys2(
   align(
     { modes: ["none", "none", "max"] },
-    translate([thumbKeySwitchHolderWidth / 2, 0, 0], thumbPole2)
+    translate(
+      [-thumbKeySwitchHolderWidth / 2, 0, 0],
+      createThumbPole({ startAngle: degToRad(90), endAngle: degToRad(270) })
+    ),
+    translate(
+      [(thumbKeySwitchHolderWidth / 2) * 3, 0, 0],
+      createThumbPole({ startAngle: degToRad(270), endAngle: degToRad(90) })
+    )
   )
 );
 
-const joystickBase = transformJoystick(
+const joystickPoles = transformJoystick(
   align(
     { modes: ["none", "none", "max"] },
     translate([0, 7, 0], joystickPole),
@@ -543,11 +534,7 @@ const joystickBase = transformJoystick(
   )
 );
 
-const poles3 = onlyPositiveZ(
-  ...thumbKeysBase1,
-  thumbKeysBase2,
-  ...joystickBase
-);
+const poles3 = onlyPositiveZ(...thumbPoles1, ...thumbPoles2, ...joystickPoles);
 
 const poles = [...poles1, ...poles2, ...poles3];
 
@@ -556,9 +543,9 @@ export const plate = [
     union(
       extrudeLinear(
         { height: plateHeight },
-        offset({ delta: 1 }, projectAndCut(hull(poles1))),
-        offset({ delta: 1 }, projectAndCut(hull(poles2))),
-        offset({ delta: 1 }, projectAndCut(hull(poles3))),
+        projectAndCut(hull(poles1)),
+        projectAndCut(hull(poles2)),
+        projectAndCut(hull(poles3)),
         projectAndCut(hull(poles1[0], poles2[5])),
         projectAndCut(hull(poles1[5], poles2[0])),
         projectAndCut(hull(poles2[0], poles3[0])),

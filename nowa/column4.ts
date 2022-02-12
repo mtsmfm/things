@@ -1,5 +1,9 @@
-import { createColumn } from ".";
+import { createColumn, contouredDeg } from ".";
+import { align, degToRad, rotate } from "../utils";
 
 export const main = () => {
-  return createColumn(4);
+  return align(
+    { modes: ["center", "center", "min"] },
+    rotate([degToRad(contouredDeg / 2)], createColumn(4))
+  );
 };
